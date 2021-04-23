@@ -11,7 +11,6 @@
  import path from 'path';
  import glob from 'glob-promise';
 import * as assert from 'assert';
-import { makeDataset } from '@pipcook/datacook/dist/dataset';
 /**
  * collect the data either from remote url or local file system. It expects a zip
  * which contains the structure of traditional image classification data folder.
@@ -60,9 +59,8 @@ const imageClassDataCollect: DataSourceEntry<Dataset.Types.Sample, Dataset.Types
     isDownload = true;
   }
 
-  const imageDir = path.join(dataDir, 'images');
   console.log('unzip and collecting data...');
-  let imagePaths = await glob(path.join(imageDir, '**', '+(train|validation|test)', '*', '*.+(jpg|jpeg|png)'));
+  let imagePaths = await glob(path.join(dataDir, '**', '+(train|validation|test)', '*', '*.+(jpg|jpeg|png)'));
 
   // TODO utils for making dataset
   const train: any[] = [];
@@ -83,11 +81,12 @@ const imageClassDataCollect: DataSourceEntry<Dataset.Types.Sample, Dataset.Types
     }
 
     if (trainType == 'train') {
-      train.push({ data: imagePath, label: categoryIndex});
+      train.push({ data: await context.dataCook.Image.read(imagePath), label: categoryIndex});
     } else if (trainType == 'test') {
-      test.push({ data: imagePath, label: categoryIndex});
+      test.push({ data: await context.dataCook.Image.read(imagePath), label: categoryIndex});
     }
   }
+
   const sample = await context.dataCook.Image.read(train[0].data);
 
   const meta = {
@@ -106,7 +105,7 @@ const imageClassDataCollect: DataSourceEntry<Dataset.Types.Sample, Dataset.Types
     labelMap: categories
   }
 
-  return makeDataset({
+  return Dataset.makeDataset({
     trainData: train,
     testData: test
   }, meta);

@@ -1,6 +1,5 @@
 import { DataFlowEntry, ScriptContext } from '@pipcook/core';
 import { Dataset } from '@pipcook/datacook';
-import { transformDataset } from '@pipcook/datacook/dist/dataset';
 
 const resizeEntry: DataFlowEntry<Dataset.Types.Sample, Dataset.Types.ImageDatasetMeta> = async (dataset: Dataset.Types.Dataset<Dataset.Types.Sample, any>, options: Record<string, any>, context: ScriptContext)  => {
   const [x='-1', y='-1'] = options['size'];
@@ -8,7 +7,7 @@ const resizeEntry: DataFlowEntry<Dataset.Types.Sample, Dataset.Types.ImageDatase
   const parsedY = parseInt(y);
   if (parsedX == -1 || parsedY == -1) return;
 
-  return transformDataset<Dataset.Types.ImageDatasetMeta, Dataset.Types.Sample>({
+  return Dataset.transformDataset<Dataset.Types.ImageDatasetMeta, Dataset.Types.Sample>({
     next: async (sample) => {
       const resized = sample.data.resize(parsedX, parsedY);
       const { normalize = false } = options;
